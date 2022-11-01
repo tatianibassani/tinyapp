@@ -16,7 +16,7 @@ const urlDatabase = {
 app.use(express.urlencoded({ extended: true }));
 
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  res.redirect("/urls");
 });
 
 app.listen(PORT, () => {
@@ -55,6 +55,14 @@ app.get("/urls/:id", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  console.log(req.body); // Log the POST request body to the console
-  res.send("Ok"); // Respond with 'Ok' (we will replace this)
+  const shortUrl = generateRandomString();
+  const longUrl = req.body.longURL;
+  urlDatabase[shortUrl] = longUrl;
+  console.log(urlDatabase); // Log the POST request body to the console
+  res.redirect("/urls"); // Respond with 'Ok' (we will replace this)
+});
+
+app.get("/u/:id", (req, res) => {
+  const longURL = urlDatabase[req.params.id];
+  res.redirect(longURL);
 });
