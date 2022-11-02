@@ -139,6 +139,21 @@ app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
 
+  if (!email) {
+    return res.sendStatus(400).send('Email cannot be empty');
+  }
+
+  let emailFound = false;
+  for (let key in users) {
+    if (users[key].email === email) {
+       emailFound = true;
+    }
+  }
+
+  if (!emailFound) {
+    return res.sendStatus(400).send('Not found');
+  }
+
   users[id] = {
     id,
     email,
