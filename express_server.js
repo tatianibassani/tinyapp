@@ -28,6 +28,12 @@ const users = {
   },
 };
 
+const isLoggedIn = function(req, res) {
+  if (!req.cookies.user_id) {
+    res.redirect('/login');
+  }
+}
+
 app.use(express.urlencoded({ extended: true }));
 
 app.get("/", (req, res) => {
@@ -57,6 +63,9 @@ app.get("/set", (req, res) => {
 
  app.get("/urls", (req, res) => {
   const user = users[req.cookies.user_id];
+
+  isLoggedIn(req, res);
+
   const templateVars = { 
     urls: urlDatabase,
     user
@@ -66,6 +75,9 @@ app.get("/set", (req, res) => {
 
 app.get("/urls/new", (req, res) => {
   const user = users[req.cookies.user_id];
+
+  isLoggedIn(req, res);
+
   const templateVars = { 
     user
   };
@@ -73,6 +85,10 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:id", (req, res) => {
+  isLoggedIn(req, res);
+  if (!urlDatabase[req.params.id]) {
+    res.redirect("/error");
+  }
   const user = users[req.cookies.user_id];
   const templateVars = { 
     id: req.params.id, 
@@ -83,6 +99,8 @@ app.get("/urls/:id", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
+  isLoggedIn(req, res);
+
   const shortUrl = generateRandomString();
   const longUrl = req.body.longURL;
   urlDatabase[shortUrl] = longUrl;
@@ -167,5 +185,9 @@ app.post("/register", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-  return res.render( 'login' );
+  return res.render('login');
+});
+
+app.get("/error", (req, res) => {
+  return res.render('error');
 });
