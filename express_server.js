@@ -15,6 +15,19 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+const users = {
+  userRandomID: {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur",
+  },
+  user2RandomID: {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk",
+  },
+};
+
 app.use(express.urlencoded({ extended: true }));
 
 app.get("/", (req, res) => {
@@ -43,25 +56,28 @@ app.get("/set", (req, res) => {
  });
 
  app.get("/urls", (req, res) => {
+  const user = users[req.cookies.user_id];
   const templateVars = { 
     urls: urlDatabase,
-    username: req.cookies["username"]
+    user
   };
   res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
+  const user = users[req.cookies.user_id];
   const templateVars = { 
-    username: req.cookies["username"]
+    user
   };
   res.render("urls_new", templateVars);
 });
 
 app.get("/urls/:id", (req, res) => {
+  const user = users[req.cookies.user_id];
   const templateVars = { 
     id: req.params.id, 
     longURL: urlDatabase[req.params.id],
-    username: req.cookies["username"]
+    user
   };
   res.render("urls_show", templateVars);
 });
@@ -95,16 +111,41 @@ app.post("/urls/:id", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  const username = req.body.username;
-  res.cookie('username', username);
+  const email = req.body.email;
+
+  let user;
+
+  for (let key in users) {
+    if (users[key].email === email) {
+      user = users[key];
+      res.cookie("user_id", user.id);
+    }
+  }
+
   res.redirect("/urls");
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie('username');
+  res.clearCookie('user_id');
   res.redirect("/urls");
 })
 
 app.get("/register", (req, res) => {
   res.render("register");
+});
+
+app.post("/register", (req, res) => {
+  const id = generateRandomString();
+  const email = req.body.email;
+  const password = req.body.password;
+
+  users[id] = {
+    id,
+    email,
+    password
+  };
+
+  res.cookie('user_id', id);
+
+  res.redirect("/urls");
 });
