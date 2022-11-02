@@ -123,11 +123,12 @@ app.post("/login", (req, res) => {
       res.redirect("/urls");
     }
   }
+  res.sendStatus('403');
 });
 
 app.post("/logout", (req, res) => {
   res.clearCookie('user_id');
-  res.redirect("/urls");
+  res.redirect("/login");
 })
 
 app.get("/register", (req, res) => {
@@ -150,8 +151,8 @@ app.post("/register", (req, res) => {
     }
   }
 
-  if (!emailFound) {
-    return res.sendStatus(400).send('Not found');
+  if (emailFound) {
+    return res.sendStatus(400).send('Email already exists');
   }
 
   users[id] = {
