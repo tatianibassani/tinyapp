@@ -112,17 +112,17 @@ app.post("/urls/:id", (req, res) => {
 
 app.post("/login", (req, res) => {
   const email = req.body.email;
+  const password = req.body.password;
 
   let user;
 
   for (let key in users) {
-    if (users[key].email === email) {
+    if (users[key].email === email && users[key].password === password) {
       user = users[key];
       res.cookie("user_id", user.id);
+      res.redirect("/urls");
     }
   }
-
-  res.redirect("/urls");
 });
 
 app.post("/logout", (req, res) => {
@@ -163,4 +163,8 @@ app.post("/register", (req, res) => {
   res.cookie('user_id', id);
 
   res.redirect("/urls");
+});
+
+app.get("/login", (req, res) => {
+  return res.render( 'login' );
 });
