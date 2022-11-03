@@ -11,20 +11,26 @@ function generateRandomString() {
 app.set("view engine", "ejs");
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": {
+    longURL: "http://www.lighthouselabs.ca",
+    userID: 'userRandomID'
+  },
+  "9sm5xK": {
+    longURL: "http://www.google.com",
+    userID: 'user2RandomID'
+  }
 };
 
 const users = {
   userRandomID: {
     id: "userRandomID",
     email: "user@example.com",
-    password: "purple-monkey-dinosaur",
+    password: "123",
   },
   user2RandomID: {
     id: "user2RandomID",
     email: "user2@example.com",
-    password: "dishwasher-funk",
+    password: "123",
   },
 };
 
@@ -92,7 +98,7 @@ app.get("/urls/:id", (req, res) => {
   const user = users[req.cookies.user_id];
   const templateVars = { 
     id: req.params.id, 
-    longURL: urlDatabase[req.params.id],
+    longURL: urlDatabase[req.params.id].longURL,
     user
   };
   res.render("urls_show", templateVars);
@@ -102,14 +108,18 @@ app.post("/urls", (req, res) => {
   isLoggedIn(req, res);
 
   const shortUrl = generateRandomString();
-  const longUrl = req.body.longURL;
-  urlDatabase[shortUrl] = longUrl;
+  const longURL = req.body.longURL;
+  Object.assign(urlDatabase, {[shortUrl]: {
+    longURL,
+    userID: req.cookies.user_id
+  }});
+  //urlDatabase[shortUrl].longURL = longUrl;
   console.log(urlDatabase); // Log the POST request body to the console
   res.redirect("/urls"); // Respond with 'Ok' (we will replace this)
 });
 
 app.get("/u/:id", (req, res) => {
-  const longURL = urlDatabase[req.params.id];
+  const longURL = urlDatabase[req.params.id].longURL;
   res.redirect(longURL);
 });
 
@@ -124,7 +134,7 @@ app.post("/urls/:id", (req, res) => {
   console.log(req.params);
   const id = req.params.id;
   const longUrl = req.body.longURL;
-  urlDatabase[id] = longUrl;
+  urlDatabase[id].longURL = longUrl;
   res.redirect("/urls");
 });
 
