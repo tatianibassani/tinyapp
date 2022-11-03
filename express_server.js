@@ -8,6 +8,18 @@ function generateRandomString() {
   return (Math.random() + 1).toString(36).substring(7);
 }
 
+function urlsForUser(id) {
+  const userUrls = {};
+
+  for (let key in urlDatabase) {
+    if (urlDatabase[key].userID === id) {
+      Object.assign(userUrls, {[key]:urlDatabase[key]});
+    }
+  }
+
+  return userUrls;
+}
+
 app.set("view engine", "ejs");
 
 const urlDatabase = {
@@ -72,8 +84,10 @@ app.get("/set", (req, res) => {
 
   isLoggedIn(req, res);
 
+  const userUrls = urlsForUser(user.id);
+
   const templateVars = { 
-    urls: urlDatabase,
+    urls: userUrls,
     user
   };
   res.render("urls_index", templateVars);
@@ -92,10 +106,15 @@ app.get("/urls/new", (req, res) => {
 
 app.get("/urls/:id", (req, res) => {
   isLoggedIn(req, res);
-  if (!urlDatabase[req.params.id]) {
+
+  const user = users[req.cookies.user_id];
+
+  const userUrls = urlsForUser(user.id);
+
+  if (!userUrls[req.params.id]) {
     res.redirect("/error");
   }
-  const user = users[req.cookies.user_id];
+  
   const templateVars = { 
     id: req.params.id, 
     longURL: urlDatabase[req.params.id].longURL,
@@ -124,15 +143,29 @@ app.get("/u/:id", (req, res) => {
 });
 
 app.post("/urls/:id/delete", (req, res) => {
-  console.log(req.params);
   const id = req.params.id;
+
+  const user = users[req.cookies.user_id];
+  const userUrls = urlsForUser(user.id);
+
+  if (!userUrls[id]) {
+    res.redirect("/error");
+  }
+
   delete urlDatabase[id];
   res.redirect("/urls");
 });
 
 app.post("/urls/:id", (req, res) => {
-  console.log(req.params);
   const id = req.params.id;
+
+  const user = users[req.cookies.user_id];
+  const userUrls = urlsForUser(user.id);
+
+  if (!userUrls[id]) {
+    res.redirect("/error");
+  }
+
   const longUrl = req.body.longURL;
   urlDatabase[id].longURL = longUrl;
   res.redirect("/urls");
