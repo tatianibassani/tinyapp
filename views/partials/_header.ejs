@@ -18,7 +18,11 @@
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
       </div>
     </div>
-    <% if (user == null) { %>
+    <% if (user == undefined) { %>
+      <form class="form-inline text-right" method="GET" action="/login">        
+        <button class="btn btn-outline-dark"
+        type="submit">Login</button>
+      </form>
       <form class="form-inline text-right" method="GET" action="/register">        
         <button class="btn btn-outline-dark"
         type="submit">Register</button>
