@@ -2,12 +2,15 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const cookieSession = require('cookie-session');
 const { getUserByEmail } = require('./helpers');
+
 const app = express();
+
 app.use(cookieSession({
   name: 'session',
   keys: ['SHA384', 'base64']
 }));
-const PORT = 8080; // default port 8080
+
+const PORT = 8080; 
 
 const generateRandomString = function() {
   return (Math.random() + 1).toString(36).substring(7);
@@ -63,26 +66,8 @@ app.get("/", (req, res) => {
   res.redirect("/urls");
 });
 
-app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
-});
-
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
-});
-
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
-});
-
-app.get("/set", (req, res) => {
-  const a = 1;
-  res.send(`a = ${a}`);
-});
- 
-let a;
-app.get("/fetch", (req, res) => {
-  res.send(`a = ${a}`);
 });
 
 app.get("/urls", (req, res) => {
@@ -133,6 +118,36 @@ app.get("/urls/:id", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+app.get("/u/:id", (req, res) => {
+  if (urlDatabase[req.params.id] === undefined) {
+    res.render('error');
+  }
+
+  const longURL = urlDatabase[req.params.id].longURL;
+  res.redirect(longURL);
+});
+
+app.get("/register", (req, res) => {
+  const user = users[req.session.user_id];
+  if (user) {
+    res.redirect('/urls');
+  }
+  res.render("register");
+});
+
+app.get("/login", (req, res) => {
+  const user = users[req.session.user_id];
+
+  const templateVars = {
+    user
+  };
+  return res.render('login', templateVars);
+});
+
+app.get("/error",(req, res) => {
+  return res.render('error');
+});
+
 app.post("/urls", (req, res) => {
   if (!req.session.user_id) {
     res.redirect('/error');
@@ -144,19 +159,7 @@ app.post("/urls", (req, res) => {
     longURL,
     userID: req.session.user_id
   }});
-  //urlDatabase[shortUrl].longURL = longUrl;
-  console.log(urlDatabase); // Log the POST request body to the console
   res.redirect("/urls"); // Respond with 'Ok' (we will replace this)
-});
-
-app.get("/u/:id", (req, res) => {
-
-  if (urlDatabase[req.params.id] === undefined) {
-    res.render('error');
-  }
-
-  const longURL = urlDatabase[req.params.id].longURL;
-  res.redirect(longURL);
 });
 
 app.post("/urls/:id/delete", (req, res) => {
@@ -201,18 +204,11 @@ app.post("/login", (req, res) => {
   res.sendStatus('403');
 });
 
+
 app.post("/logout", (req, res) => {
   //res.clearCookie('user_id');
   req.session = null;
   res.redirect("/login");
-});
-
-app.get("/register", (req, res) => {
-  const user = users[req.session.user_id];
-  if (user) {
-    res.redirect('/urls');
-  }
-  res.render("register");
 });
 
 app.post("/register", (req, res) => {
@@ -238,22 +234,11 @@ app.post("/register", (req, res) => {
     password: encryptedPassword
   };
 
-  console.log(users);
-
   req.session.user_id = id;
 
   res.redirect("/urls");
 });
 
-app.get("/login", (req, res) => {
-  const user = users[req.session.user_id];
-
-  const templateVars = {
-    user
-  };
-  return res.render('login', templateVars);
-});
-
-app.get("/error",(req, res) => {
-  return res.render('error');
+app.listen(PORT, () => {
+  console.log(`Example app listening on port ${PORT}!`);
 });
