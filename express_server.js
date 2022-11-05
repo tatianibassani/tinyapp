@@ -31,17 +31,19 @@ app.get("/urls.json", (req, res) => {
 app.get("/urls", (req, res) => {
   const user = users[req.session.user_id];
 
-  if (!req.session.user_id) {
-    res.redirect('/error');
+  if (!req.session.user_id || !user) {
+    const message = {
+      message: "You should be logged in to access this page."
+    };
+    res.render('error', message);
+  } else {
+    const userUrls = urlsForUser(user.id, urlDatabase);
+    const templateVars = {
+      urls: userUrls,
+      user
+    };
+    res.render("urls_index", templateVars);
   }
-
-  const userUrls = urlsForUser(user.id, urlDatabase);
-
-  const templateVars = {
-    urls: userUrls,
-    user
-  };
-  res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
@@ -57,23 +59,29 @@ app.get("/urls/new", (req, res) => {
 
 app.get("/urls/:id", (req, res) => {
   if (!req.session.user_id) {
-    res.redirect('/error');
+    const message = {
+      message: "You are not logged in. Please log in and try again."
+    };
+    res.render('error', message);
+  } else {
+    const user = users[req.session.user_id];
+
+    const userUrls = urlsForUser(user.id, urlDatabase);
+
+    if (!userUrls[req.params.id] || !user) {
+      const message = {
+        message: "You are not authorized to access this page."
+      };
+      res.render('error', message);
+    }
+
+    const templateVars = {
+      id: req.params.id,
+      longURL: urlDatabase[req.params.id].longURL,
+      user
+    };
+    res.render("urls_show", templateVars);
   }
-
-  const user = users[req.session.user_id];
-
-  const userUrls = urlsForUser(user.id, urlDatabase);
-
-  if (!userUrls[req.params.id]) {
-    res.redirect("/error");
-  }
-  
-  const templateVars = {
-    id: req.params.id,
-    longURL: urlDatabase[req.params.id].longURL,
-    user
-  };
-  res.render("urls_show", templateVars);
 });
 
 app.get("/u/:id", (req, res) => {
@@ -117,7 +125,7 @@ app.post("/urls", (req, res) => {
     longURL,
     userID: req.session.user_id
   }});
-  res.redirect("/urls"); // Respond with 'Ok' (we will replace this)
+  res.redirect("/urls/"+shortUrl);
 });
 
 app.post("/urls/:id/delete", (req, res) => {
