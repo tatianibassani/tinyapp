@@ -1,7 +1,11 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const cookieSession = require('cookie-session');
-const { getUserByEmail } = require('./helpers');
+const { getUserByEmail,
+        generateRandomString,
+        urlsForUser,
+        isLoggedIn } = require('./helpers');
+const {urlDatabase, users} = require('./database');
 
 const app = express();
 
@@ -12,55 +16,9 @@ app.use(cookieSession({
 
 const PORT = 8080; 
 
-const generateRandomString = function() {
-  return (Math.random() + 1).toString(36).substring(7);
-};
-
-const urlsForUser = function(id) {
-  const userUrls = {};
-
-  for (let key in urlDatabase) {
-    if (urlDatabase[key].userID === id) {
-      Object.assign(userUrls, {[key]:urlDatabase[key]});
-    }
-  }
-
-  return userUrls;
-};
+app.use(express.urlencoded({ extended: true }));
 
 app.set("view engine", "ejs");
-
-const urlDatabase = {
-  "b2xVn2": {
-    longURL: "http://www.lighthouselabs.ca",
-    userID: 'userRandomID'
-  },
-  "9sm5xK": {
-    longURL: "http://www.google.com",
-    userID: 'user2RandomID'
-  }
-};
-
-const users = {
-  userRandomID: {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "$2a$10$ot3mVXNF9Gjxmtyt3Zu7NeOktm1xIN8JnUl0zVUiFWTxpeyNoZKBS",
-  },
-  user2RandomID: {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "$2a$10$ot3mVXNF9Gjxmtyt3Zu7NeOktm1xIN8JnUl0zVUiFWTxpeyNoZKBS",
-  },
-};
-
-const isLoggedIn = function(req, res) {
-  if (!req.session.user_id) {
-    res.redirect('/login');
-  }
-};
-
-app.use(express.urlencoded({ extended: true }));
 
 app.get("/", (req, res) => {
   res.redirect("/urls");
@@ -77,7 +35,7 @@ app.get("/urls", (req, res) => {
     res.redirect('/error');
   }
 
-  const userUrls = urlsForUser(user.id);
+  const userUrls = urlsForUser(user.id, urlDatabase);
 
   const templateVars = {
     urls: userUrls,
@@ -104,7 +62,7 @@ app.get("/urls/:id", (req, res) => {
 
   const user = users[req.session.user_id];
 
-  const userUrls = urlsForUser(user.id);
+  const userUrls = urlsForUser(user.id, urlDatabase);
 
   if (!userUrls[req.params.id]) {
     res.redirect("/error");
@@ -166,7 +124,7 @@ app.post("/urls/:id/delete", (req, res) => {
   const id = req.params.id;
 
   const user = users[req.session.user_id];
-  const userUrls = urlsForUser(user.id);
+  const userUrls = urlsForUser(user.id, urlDatabase);
 
   if (!userUrls[id]) {
     res.redirect("/error");
@@ -180,7 +138,7 @@ app.post("/urls/:id", (req, res) => {
   const id = req.params.id;
 
   const user = users[req.session.user_id];
-  const userUrls = urlsForUser(user.id);
+  const userUrls = urlsForUser(user.id, urlDatabase);
 
   if (!userUrls[id]) {
     res.redirect("/error");
@@ -197,11 +155,14 @@ app.post("/login", (req, res) => {
 
   const user = getUserByEmail(email, users);
 
+  if (!user) {
+    res.sendStatus('403');
+  }
+
   if (bcrypt.compareSync(password, user.password)) {
     req.session.user_id = user.id;
     res.redirect("/urls");
   }
-  res.sendStatus('403');
 });
 
 
