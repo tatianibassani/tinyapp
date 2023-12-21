@@ -2,6 +2,8 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 
+app.use(express.urlencoded({ extended: true }));
+
 app.set("view engine", "ejs");
 
 const urlDatabase = {
@@ -40,7 +42,7 @@ app.get("/urls.json", (req, res) => {
     res.render("urls_show", templateVars);
   });
 
-  app.use(express.urlencoded({ extended: true }));
+  //app.use(express.urlencoded({ extended: true }));
 
   app.post("/urls", (req, res) => {
     console.log(req.body); // Log the POST request body to the console
@@ -48,5 +50,17 @@ app.get("/urls.json", (req, res) => {
   });
 
   function generateRandomString() {
-
+    const char = "abcdefghijklmnopqrstuvwxyz"
+    let randomString = "";
+  
+    for (let i = 0; i < 6; i++) {
+      const randomIndex = Math.floor(Math.random() * char.length);
+      randomString += char.charAt(randomIndex);
+    }
+  
+    return randomString;
   }
+  
+  const shortURL = generateRandomString();
+  console.log(shortURL);
+  
