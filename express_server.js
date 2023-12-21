@@ -30,7 +30,23 @@ app.get("/urls.json", (req, res) => {
     res.render("urls_index", templateVars);
   });
 
+  app.get("/urls/new", (req, res) => {
+    console.log('test');
+    res.render("urls_new");
+  });
+
   app.get("/urls/:id", (req, res) => {
     const templateVars = { id: req.params.id, longURL: urlDatabase };
     res.render("urls_show", templateVars);
   });
+
+  app.use(express.urlencoded({ extended: true }));
+
+  app.post("/urls", (req, res) => {
+    console.log(req.body); // Log the POST request body to the console
+    res.send("Ok"); // Respond with 'Ok' (we will replace this)
+  });
+
+  function generateRandomString() {
+
+  }
