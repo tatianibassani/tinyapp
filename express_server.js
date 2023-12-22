@@ -72,5 +72,5 @@ app.get("/urls.json", (req, res) => {
   }
   
   const shortURL = generateRandomString();
-  console.log(shortURL);
+  //console.log(shortURL);
   
