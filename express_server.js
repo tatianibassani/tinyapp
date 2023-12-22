@@ -33,20 +33,30 @@ app.get("/urls.json", (req, res) => {
   });
 
   app.get("/urls/new", (req, res) => {
-    console.log('test');
     res.render("urls_new");
   });
 
   app.get("/urls/:id", (req, res) => {
-    const templateVars = { id: req.params.id, longURL: urlDatabase };
+    const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id] };
     res.render("urls_show", templateVars);
+  });
+
+  app.get("/u/:id", (req, res) => {
+    let longURL = urlDatabase[req.params.id];
+    res.redirect(longURL);
   });
 
   //app.use(express.urlencoded({ extended: true }));
 
   app.post("/urls", (req, res) => {
     console.log(req.body); // Log the POST request body to the console
-    res.send("Ok"); // Respond with 'Ok' (we will replace this)
+
+    let shortUrl = generateRandomString();
+    let longUrl = req.body.longURL;
+
+    Object.assign(urlDatabase, {[shortUrl]: longUrl});
+
+    res.redirect(`/urls/${shortUrl}`);
   });
 
   function generateRandomString() {
