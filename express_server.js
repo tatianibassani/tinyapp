@@ -59,6 +59,14 @@ app.get("/urls.json", (req, res) => {
     res.redirect(`/urls/${shortUrl}`);
   });
 
+  app.post("/urls/:id/delete", (req, res) => {
+    const id = req.params.id;
+    
+    delete urlDatabase[id];
+    res.redirect("/urls");
+});
+
+
   function generateRandomString() {
     const char = "abcdefghijklmnopqrstuvwxyz"
     let randomString = "";
