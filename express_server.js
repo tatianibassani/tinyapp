@@ -64,8 +64,14 @@ app.get("/urls.json", (req, res) => {
     
     delete urlDatabase[id];
     res.redirect("/urls");
-});
+  });
 
+  app.post("/urls/:id/edit", (req, res) => {
+    const id = req.params.id;
+    
+    urlDatabase[id] = req.body.newValue;
+    res.redirect("/urls");
+  });
 
   function generateRandomString() {
     const char = "abcdefghijklmnopqrstuvwxyz"
