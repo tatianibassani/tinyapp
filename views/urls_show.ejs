@@ -9,7 +9,10 @@
       crossorigin="anonymous"
     />
     <title>URL - TinyApp Example</title>
+    
+    
   </head>
+
 
   <body>
     <%- include('partials/_header.ejs')%>
@@ -21,7 +24,8 @@
           Short URL ID: <a href="/u/<%= id %>"><%= id %></a>
         </p>
       </div>
-      <div class="card-footer text-muted text-center d-flex justify-content-center align-items-center flex-column">
+      <div class="card-footer text-muted text-center d-flex justify-content-center align-items-center flex-column ">
+        
         <h5 class="card-title text-center">Edit</h5>
         <div class="card-text text-center">
           <form class="form-inline" action="/urls/<%= id %>/edit" method="POST">
