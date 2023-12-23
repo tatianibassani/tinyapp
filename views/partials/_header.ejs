@@ -16,20 +16,24 @@
         <div class="navbar-nav">
           <a class="nav-item nav-link" href="/urls">My URLs</a>
           <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
-          <a class=" flex-column  d-inline-flex">
-            <form class="form-inline" action="/login" method="POST">
-              <div class="form-inline">
-                <input
-                  class="form-control"
-                  type="text"
-                  name="username"
-                  placeholder="Username"
-                  style="width: 300px; margin: 1em"
-                />
-                <button type="submit" class="btn btn-outline-dark">Login</button>
-              </div>
-            </form>
-          </a>  
+          <% if (username) { %>
+            <a><%= username %></a>
+          <% } else { %>
+            <a class=" flex-column  d-inline-flex">
+              <form class="form-inline" action="/login" method="POST">
+                <div class="form-inline">
+                  <input
+                    class="form-control"
+                    type="text"
+                    name="username"
+                    placeholder="Username"
+                    style="width: 300px; margin: 1em"
+                  />
+                  <button type="submit" class="btn btn-outline-dark">Login</button>
+                </div>
+              </form>
+            </a>  
+          <% } %>
           </div>
         </div>
       </div>
