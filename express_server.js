@@ -1,5 +1,6 @@
 const express = require("express");
 const cookieParser = require("cookie-parser");
+const { users } = require("./database");
 const app = express();
 const PORT = 8080; // default port 8080
 
@@ -113,7 +114,17 @@ app.get("/urls.json", (req, res) => {
    });
 
    app.post("/register", (req, res) => {
-    console.log(req.body);
+    const id = generateRandomString();
+    const email = req.body.email;
+    const password = req.body.password;
+
+    Object.assign(users, {[id]: 
+      Object.assign({}, {id, email, password})
+    });
+
+    res.cookie('username', email);
+
+    res.redirect("/urls");
   
    });
 
