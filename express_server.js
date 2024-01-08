@@ -53,15 +53,22 @@ app.get("/urls.json", (req, res) => {
     let longURL = urlDatabase[req.params.id];
     res.redirect(longURL);
   });
-//new******
-  app.get("/urls", (req, res) => {
-    const templateVars = {
-      username: req.cookies["username"],
-      // ... any other vars
-    };
-    console.log(templateVars);
-    res.render("urls_index", templateVars);
-  });
+
+  app.get("/register", (req, res) => {
+    //res.redirect('/urls');
+  
+  res.render("register");
+});
+  
+// //new******
+//   app.get("/urls", (req, res) => {
+//     const templateVars = {
+//       username: req.cookies["username"],
+//       // ... any other vars
+//     };
+//     console.log(templateVars);
+//     res.render("urls_index", templateVars);
+//   });
 
   //app.use(express.urlencoded({ extended: true }));
 
@@ -103,6 +110,11 @@ app.get("/urls.json", (req, res) => {
     //console.log('logging out');
     res.clearCookie('username');
     res.redirect("/urls")
+   });
+
+   app.post("/register", (req, res) => {
+    console.log(req.body);
+  
    });
 
 
