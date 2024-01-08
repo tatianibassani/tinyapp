@@ -31,16 +31,17 @@ app.get("/urls.json", (req, res) => {
   });
   
   app.get("/urls", (req, res) => {
+    console.log(users[req.cookies["username"]]);
     const templateVars = { 
       urls: urlDatabase,
-      username: req.cookies["username"]
+      user: users[req.cookies["username"]]
     };
     res.render("urls_index", templateVars);
   });
 
   app.get("/urls/new", (req, res) => {
     const templateVars = { 
-      username: req.cookies["username"]
+      user: users[req.cookies["username"]]
     };
     res.render("urls_new", templateVars);
   });
@@ -122,7 +123,7 @@ app.get("/urls.json", (req, res) => {
       Object.assign({}, {id, email, password})
     });
 
-    res.cookie('username', email);
+    res.cookie('username', id);
 
     res.redirect("/urls");
   
