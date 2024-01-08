@@ -38,7 +38,10 @@ app.get("/urls.json", (req, res) => {
   });
 
   app.get("/urls/new", (req, res) => {
-    res.render("urls_new");
+    const templateVars = { 
+      username: req.cookies["username"]
+    };
+    res.render("urls_new", templateVars);
   });
 
   app.get("/urls/:id", (req, res) => {
@@ -95,6 +98,13 @@ app.get("/urls.json", (req, res) => {
     res.redirect("/urls");
 
    });
+
+   app.post("/logout", (req, res) => {
+    //console.log('logging out');
+    res.clearCookie('username');
+    res.redirect("/urls")
+   });
+
 
   function generateRandomString() {
     const char = "abcdefghijklmnopqrstuvwxyz"
