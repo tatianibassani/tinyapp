@@ -57,9 +57,21 @@ app.get("/urls.json", (req, res) => {
   });
 
   app.get("/register", (req, res) => {
-    //res.redirect('/urls');
-  
-  res.render("register");
+    const templateVars = { 
+      user: undefined
+    };
+    return res.render('login', templateVars);
+  });
+
+app.get("/login", (req, res) => {
+  const templateVars = { 
+    user: undefined
+  };
+  return res.render('login', templateVars);
+});
+
+app.get("/error",(req, res) => {
+  return res.render('error');
 });
   
 // //new******
@@ -101,18 +113,26 @@ app.get("/urls.json", (req, res) => {
 
  
   app.post("/login", (req, res) => {
-    const username = req.body.username;
+    const email = req.body.email;
+    const password = req.body.password;
+  
+    const user = getUserByEmail(email, users);
+  
+    if (!user) {
+      res.sendStatus('403');
+    }
+  
+    if (bcrypt.compareSync(password, user.password)) {
+      req.session.user_id = user.id;
+      res.redirect("/urls");
+    }
+  });
 
-    res.cookie('username', username);
-    res.redirect("/urls");
-
-   });
-
-   app.post("/logout", (req, res) => {
-    //console.log('logging out');
-    res.clearCookie('username');
-    res.redirect("/urls")
-   });
+  app.post("/logout", (req, res) => {
+    //res.clearCookie('user_id');
+    req.session = null;
+    res.redirect("/login");
+  });
 
    app.post("/register", (req, res) => {
     const id = generateRandomString();
@@ -139,6 +159,15 @@ app.get("/urls.json", (req, res) => {
     
     }
    });
+
+//login new
+  
+  app.post("/urls", (req, res) => {
+    if (!req.session.user_id) {
+      res.redirect('/error');
+    }
+    });
+
 
   function generateRandomString() {
     const char = "abcdefghijklmnopqrstuvwxyz"

@@ -1,50 +1,38 @@
 <header>
-    <nav class="navbar navbar-expand-md navbar-dark bg-success">
-      <a class="navbar-brand" href="/urls">TinyApp</a>
-      <button
-        class="navbar-toggler"
-        type="button"
-        data-toggle="collapse"
-        data-target="#navbarNavAltMarkup"
-        aria-controls="navbarNavAltMarkup"
-        aria-expanded="false"
-        aria-label="Toggle navigation"
-      >
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-        <div class="navbar-nav">
-          <a class="nav-item nav-link" href="/urls">My URLs</a>
-          <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
-          <% if (user) { %>
-            <a><%= user.email %></a>
-            <a class=" flex-column  d-inline-flex">
-              <form class="form-inline" action="/logout" method="POST">
-                <div class="form-inline">
-                  <button type="submit" class="btn btn-outline-dark">Logout</button>
-              
-                </div>
-              </form>
-            </a>  
-          <% } else { %>
-            <a class=" flex-column  d-inline-flex">
-              <form class="form-inline" action="/login" method="POST">
-                <div class="form-inline">
-                  <input
-                    class="form-control"
-                    type="text"
-                    name="username"
-                    placeholder="Username"
-                    style="width: 300px; margin: 1em"
-                  />
-                  <button type="submit" class="btn btn-outline-dark">Login</button>
-              
-                </div>
-              </form>
-            </a>  
-          <% } %>
-          </div>
-        </div>
+  <nav class="navbar navbar-expand-md navbar-dark bg-success">
+    <a class="navbar-brand" href="/urls">TinyApp</a>
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-toggle="collapse"
+      data-target="#navbarNavAltMarkup"
+      aria-controls="navbarNavAltMarkup"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+      <div class="navbar-nav">
+        <a class="nav-item nav-link" href="/urls">My URLs</a>
+        <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
       </div>
-    </nav>
-  </header>
+    </div>
+    <% if (user === undefined) { %>
+      <form class="form-inline text-right" method="GET" action="/login">        
+        <button class="btn btn-outline-dark"
+        type="submit">Login</button>
+      </form>
+      <form class="form-inline text-right" method="GET" action="/register">        
+        <button class="btn btn-outline-dark"
+        type="submit">Register</button>
+      </form>
+    <% } else { %>  
+      <label><%= user.email %></label>
+      <form class="form-inline text-right" method="POST" action="/logout">        
+        <button class="btn btn-outline-dark"
+        type="submit">Logout</button>
+      </form>
+    <% } %>
+  </nav>
+</header>
