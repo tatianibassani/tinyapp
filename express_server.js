@@ -119,16 +119,26 @@ app.get("/urls.json", (req, res) => {
     const email = req.body.email;
     const password = req.body.password;
 
-    Object.assign(users, {[id]: 
-      Object.assign({}, {id, email, password})
-    });
+    let userExists = false;
+    for (let u in users) {
+      if (users[u].email === email) {
+        userExists = true;
+      }
+    }
 
-    res.cookie('username', id);
+    if (!email || !password || userExists) {
+      res.sendStatus(400);
+    } else {
+      Object.assign(users, {[id]: 
+        Object.assign({}, {id, email, password})
+      });
 
-    res.redirect("/urls");
-  
+      res.cookie('username', id);
+
+      res.redirect("/urls");
+    
+    }
    });
-
 
   function generateRandomString() {
     const char = "abcdefghijklmnopqrstuvwxyz"
