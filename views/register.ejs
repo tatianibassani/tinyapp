@@ -17,10 +17,13 @@
     <title>TinyApp</title>
   </head>
 
+  <%- include('partials/_header') %>
+
   <body>
     <form class="text-center" method="POST" action="/register">
+      <h3>Create Account</h3>
       <div class="form-outline mb-4">
-        <label for="nameId">Email</label>
+        <label for="nameId">Email address</label>
         <input id="nameId" name="email" type="email"/>
       </div>
 
@@ -29,7 +32,7 @@
         <input id="passwordId" name="password" type="password"/>
       </div>
 
-      <button type="submit" class="btn btn-outline-primary">
+      <button type="submit" class="btn btn-primary">
         Register
       </button>
     </form>

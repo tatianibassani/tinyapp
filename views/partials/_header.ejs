@@ -28,7 +28,7 @@
         type="submit">Register</button>
       </form>
     <% } else { %>  
-      <label><%= user.email %></label>
+      <label>Logged In As: <%= user.email %></label>
       <form class="form-inline text-right" method="POST" action="/logout">        
         <button class="btn btn-outline-dark"
         type="submit">Logout</button>
