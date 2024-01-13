@@ -10,8 +10,18 @@ app.use(cookieParser());
 app.set("view engine", "ejs");
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  b6UTxQ: {
+    longURL: "https://www.tsn.ca",
+    userID: "aJ48lW",
+  },
+  i3BoGr: {
+    longURL: "https://www.google.ca",
+    userID: "aJ48lW",
+  },
+  d2fas5: {
+    longURL: "https://www.bla2test.ca",
+    userID: "d2fas5",
+  },
 };
 
 app.get("/", (req, res) => {
@@ -31,12 +41,11 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  //console.log(users[req.cookies["user_id"]]);
-  const templateVars = { 
-    urls: urlDatabase,
-    user: users[req.cookies["user_id"]]
-  };
-  res.render("urls_index", templateVars);
+  if (!req.cookies["user_id"]) {
+    res.status(403).send("You are not logged in. Please log in and try again.");
+  }
+
+  renderUrls(req, res);
 });
 //*
 app.get("/urls/new", (req, res) => {
@@ -58,6 +67,10 @@ app.get("/urls/:id", (req, res) => {
       res.status(400).send('Page not found.');
     }
 
+    if (urlDatabase[req.params.id].userID !== user.id) {
+      res.status(403).send("You don't have access to this page.");
+    }
+
     const templateVars = {
       id: req.params.id,
       longURL: urlDatabase[req.params.id].longURL,
@@ -68,7 +81,7 @@ app.get("/urls/:id", (req, res) => {
 });
 
 app.get("/u/:id", (req, res) => {
-  let longURL = urlDatabase[req.params.id];
+  let longURL = urlDatabase[req.params.id].longURL;
   res.redirect(longURL);
 });
 
@@ -102,20 +115,33 @@ app.post("/urls", (req, res) => {
   }
 
   let shortUrl = generateRandomString();
-  let longUrl = req.body.longURL;
+  let longURL = req.body.longURL;
 
-  Object.assign(urlDatabase, {[shortUrl]: longUrl});
+  let newUrl = Object.assign({}, {
+    longURL,
+    userID: req.cookies["user_id"]
+  })
 
-  //res.redirect(`/urls/${shortUrl}`);
-  const templateVars = { 
-    urls: urlDatabase,
-    user: users[req.cookies["user_id"]]
-  };
-  res.render('urls_index', templateVars);
+  Object.assign(urlDatabase, {[shortUrl]: newUrl});
+
+  renderUrls(req, res);
 });
 
 app.post("/urls/:id/delete", (req, res) => {
   const id = req.params.id;
+  const user = users[req.cookies["user_id"]];
+
+  if (urlDatabase[id] === undefined) {
+    res.status(400).send("This URL does not exist.");
+  }
+
+  if (user === undefined) {
+    res.status(401).send('You are not logged in. Please log in and try again.');
+  }
+
+  if (urlDatabase[id].userID !== user.id) {
+    res.status(403).send("You cannot delete this URL.");
+  }
   
   delete urlDatabase[id];
   res.redirect("/urls");
@@ -123,9 +149,23 @@ app.post("/urls/:id/delete", (req, res) => {
 
 app.post("/urls/:id/edit", (req, res) => {
   const id = req.params.id;
+  const user = users[req.cookies["user_id"]];
+
+  if (urlDatabase[id] === undefined) {
+    res.status(400).send("This URL does not exist.");
+  }
+
+  if (user === undefined) {
+    res.status(401).send('You are not logged in. Please log in and try again.');
+  }
+
+  if (urlDatabase[id].userID !== user.id) {
+    res.status(403).send("You cannot edit this URL.");
+  }
   
-  urlDatabase[id] = req.body.newValue;
-  res.redirect("/urls");
+  urlDatabase[id].longURL = req.body.newValue;
+  //res.redirect("/urls");
+  renderUrls(req, res);
 });
 
 
@@ -202,3 +242,23 @@ const isLoggedIn = function(req, res) {
     res.redirect('/login');
   }
 };
+
+const urlsForUser = function(userId) {
+  const filteredUrls = {};
+  for (const key in urlDatabase) {
+    if (urlDatabase.hasOwnProperty(key) && urlDatabase[key].userID === userId) {
+      filteredUrls[key] = urlDatabase[key];
+    }
+  }
+  return filteredUrls;
+}
+
+const renderUrls = function(req, res) {
+  let userUrls = urlsForUser(req.cookies["user_id"]);
+
+  const templateVars = { 
+    urls: userUrls,
+    user: users[req.cookies["user_id"]]
+  };
+  res.render("urls_index", templateVars);
+}
