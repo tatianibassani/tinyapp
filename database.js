@@ -16,4 +16,19 @@ const users = {
     }
   };
 
-  module.exports = {users};
+  const urlDatabase = {
+    b6UTxQ: {
+      longURL: "https://www.tsn.ca",
+      userID: "aJ48lW",
+    },
+    i3BoGr: {
+      longURL: "https://www.google.ca",
+      userID: "aJ48lW",
+    },
+    d2fas5: {
+      longURL: "https://www.bla2test.ca",
+      userID: "d2fas5",
+    },
+  };
+
+  module.exports = {users, urlDatabase};

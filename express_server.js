@@ -3,9 +3,9 @@ const bcrypt = require("bcryptjs");
 const cookieSession = require('cookie-session');
 const { getUserByEmail,
         generateRandomString,
-        urlsForUser,
-        isLoggedIn } = require('./helpers');
-const {users} = require('./database');
+        isLoggedIn,
+        renderUrls } = require('./helpers');
+const {users, urlDatabase} = require('./database');
 
 const app = express();
 
@@ -21,35 +21,8 @@ app.use(cookieSession({
 
 app.set("view engine", "ejs");
 
-const urlDatabase = {
-  b6UTxQ: {
-    longURL: "https://www.tsn.ca",
-    userID: "aJ48lW",
-  },
-  i3BoGr: {
-    longURL: "https://www.google.ca",
-    userID: "aJ48lW",
-  },
-  d2fas5: {
-    longURL: "https://www.bla2test.ca",
-    userID: "d2fas5",
-  },
-};
-
-app.get("/", (req, res) => {
-  res.send("Hello!");
-});
-
-app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
-});
-
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
-});
-
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
 app.get("/urls", (req, res) => {
@@ -57,7 +30,7 @@ app.get("/urls", (req, res) => {
     res.status(403).send("You are not logged in. Please log in and try again.");
   }
 
-  renderUrls(req, res);
+  renderUrls(req, res, users, urlDatabase);
 });
 
 app.get("/urls/new", (req, res) => {
@@ -75,7 +48,7 @@ app.get("/urls/:id", (req, res) => {
   if (!user) {
     res.status(401).send('You are not logged in. Please log in and try again.');
   } else {
-    if (urlDatabase[req.params.id] === undefined) {
+    if (!urlDatabase[req.params.id]) {
       res.status(400).send('Page not found.');
     }
 
@@ -136,18 +109,18 @@ app.post("/urls", (req, res) => {
 
   Object.assign(urlDatabase, {[shortUrl]: newUrl});
 
-  renderUrls(req, res);
+  renderUrls(req, res, users, urlDatabase);
 });
 
 app.post("/urls/:id/delete", (req, res) => {
   const id = req.params.id;
   const user = users[req.session.user_id];
 
-  if (urlDatabase[id] === undefined) {
+  if (!urlDatabase[id]) {
     res.status(400).send("This URL does not exist.");
   }
 
-  if (user === undefined) {
+  if (!user) {
     res.status(401).send('You are not logged in. Please log in and try again.');
   }
 
@@ -163,11 +136,11 @@ app.post("/urls/:id/edit", (req, res) => {
   const id = req.params.id;
   const user = users[req.session.user_id];
 
-  if (urlDatabase[id] === undefined) {
+  if (!urlDatabase[id]) {
     res.status(400).send("This URL does not exist.");
   }
 
-  if (user === undefined) {
+  if (!user) {
     res.status(401).send('You are not logged in. Please log in and try again.');
   }
 
@@ -176,8 +149,8 @@ app.post("/urls/:id/edit", (req, res) => {
   }
   
   urlDatabase[id].longURL = req.body.newValue;
-  //res.redirect("/urls");
-  renderUrls(req, res);
+
+  renderUrls(req, res, users, urlDatabase);
 });
 
 
@@ -193,6 +166,7 @@ app.post("/login", (req, res) => {
     res.status(403).send('Wrong credentials!');
   }
 
+  //Use the bcrypt library to check if the password is correct
   if (bcrypt.compareSync(password, user.password)) {
     req.session.user_id = user.id;
     res.redirect("/urls");
@@ -219,6 +193,7 @@ app.post("/register", (req, res) => {
   } else if (userExists) {
     res.status(403).send('User already exists.')
   } else {
+    //Encrypt the password using the bcrypt library
     const hashedPassword = bcrypt.hashSync(password, 10);
     Object.assign(users, {[id]: 
       Object.assign({}, {id, email, password: hashedPassword})
@@ -231,12 +206,7 @@ app.post("/register", (req, res) => {
   }
 });
 
-const renderUrls = function(req, res) {
-  let userUrls = urlsForUser(req.session.user_id, urlDatabase);
+app.listen(PORT, () => {
+  console.log(`Example app listening on port ${PORT}!`);
+});
 
-  const templateVars = { 
-    urls: userUrls,
-    user: users[req.session.user_id]
-  };
-  res.render("urls_index", templateVars);
-}
