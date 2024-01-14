@@ -25,6 +25,11 @@ app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
+app.get("/", (req, res) => {
+  isLoggedIn(req, res);
+  res.redirect("/urls");
+});
+
 app.get("/urls", (req, res) => {
   if (!req.session.user_id) {
     res.status(403).send("You are not logged in. Please log in and try again.");
@@ -66,6 +71,10 @@ app.get("/urls/:id", (req, res) => {
 });
 
 app.get("/u/:id", (req, res) => {
+  if (!urlDatabase[req.params.id]) {
+    res.status(400).send("Page not found.");
+  }
+
   let longURL = urlDatabase[req.params.id].longURL;
   res.redirect(longURL);
 });
@@ -109,7 +118,13 @@ app.post("/urls", (req, res) => {
 
   Object.assign(urlDatabase, {[shortUrl]: newUrl});
 
-  renderUrls(req, res, users, urlDatabase);
+  const user = users[req.session.user_id];
+  const templateVars = {
+    id: req.params.id,
+    longURL,
+    user
+  };
+  res.render("urls_show", templateVars);
 });
 
 app.post("/urls/:id/delete", (req, res) => {
@@ -176,7 +191,7 @@ app.post("/login", (req, res) => {
 });
 
 app.post("/logout", (req, res) => {
-  req.session.user_id = null;
+  req.session = null;
   res.redirect("/login");
 });
 
