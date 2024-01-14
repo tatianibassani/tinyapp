@@ -1,8 +1,18 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const cookieSession = require('cookie-session');
-const { users } = require("./database");
+const { getUserByEmail,
+        generateRandomString,
+        urlsForUser,
+        isLoggedIn } = require('./helpers');
+const {users} = require('./database');
+
 const app = express();
+// const express = require("express");
+// const bcrypt = require("bcryptjs");
+// const cookieSession = require('cookie-session');
+// const { users } = require("./database");
+// const app = express();
 const PORT = 8080; // default port 8080
 
 app.use(express.urlencoded({ extended: true }));
@@ -223,45 +233,8 @@ app.post("/register", (req, res) => {
   }
 });
 
-function generateRandomString() {
-  const char = "abcdefghijklmnopqrstuvwxyz"
-  let randomString = "";
-
-  for (let i = 0; i < 6; i++) {
-    const randomIndex = Math.floor(Math.random() * char.length);
-    randomString += char.charAt(randomIndex);
-  }
-
-  return randomString;
-}
-
-function getUserByEmail(email, users) {
-  for (let u in users) {
-    if (users[u].email == email) {
-      return users[u];
-    }
-  }
-  return undefined;
-}
-
-const isLoggedIn = function(req, res) {
-  if (!req.session.user_id) {
-    res.redirect('/login');
-  }
-};
-
-const urlsForUser = function(userId) {
-  const filteredUrls = {};
-  for (const key in urlDatabase) {
-    if (urlDatabase.hasOwnProperty(key) && urlDatabase[key].userID === userId) {
-      filteredUrls[key] = urlDatabase[key];
-    }
-  }
-  return filteredUrls;
-}
-
 const renderUrls = function(req, res) {
-  let userUrls = urlsForUser(req.session.user_id);
+  let userUrls = urlsForUser(req.session.user_id, urlDatabase);
 
   const templateVars = { 
     urls: userUrls,
