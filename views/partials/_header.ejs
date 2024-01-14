@@ -20,17 +20,17 @@
     </div>
     <% if (user === undefined) { %>
       <form class="form-inline text-right" method="GET" action="/login">        
-        <button class="btn btn-outline-dark"
+        <button class="btn text-white bg-transparent"
         type="submit">Login</button>
       </form>
       <form class="form-inline text-right" method="GET" action="/register">        
-        <button class="btn btn-outline-dark"
+        <button class="btn text-white bg-transparent"
         type="submit">Register</button>
       </form>
     <% } else { %>  
-      <label>Logged In As: <%= user.email %></label>
+      <label class="btn text-white bg-transparent"> </label>Logged In As: <%= user.email %></label>
       <form class="form-inline text-right" method="POST" action="/logout">        
-        <button class="btn btn-outline-dark"
+        <button class="btn text-white bg-transparent"
         type="submit">Logout</button>
       </form>
     <% } %>

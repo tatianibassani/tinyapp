@@ -8,11 +8,7 @@ const { getUserByEmail,
 const {users} = require('./database');
 
 const app = express();
-// const express = require("express");
-// const bcrypt = require("bcryptjs");
-// const cookieSession = require('cookie-session');
-// const { users } = require("./database");
-// const app = express();
+
 const PORT = 8080; // default port 8080
 
 app.use(express.urlencoded({ extended: true }));
@@ -63,7 +59,7 @@ app.get("/urls", (req, res) => {
 
   renderUrls(req, res);
 });
-//*
+
 app.get("/urls/new", (req, res) => {
   isLoggedIn(req, res);
 
@@ -191,7 +187,9 @@ app.post("/login", (req, res) => {
 
   const user = getUserByEmail(email, users);
 
-  if (!user) {
+  console.log(user);
+
+  if (user === null) {
     res.status(403).send('Wrong credentials!');
   }
 
@@ -214,7 +212,7 @@ app.post("/register", (req, res) => {
   const password = req.body.password;
 
   let user = getUserByEmail(email, users);
-  let userExists = user !== undefined;
+  let userExists = user !== null;
 
   if (!email || !password) {
     res.status(400).send('Email and password cannot be empty.')

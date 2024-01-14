@@ -12,11 +12,11 @@ function generateRandomString() {
 
 function getUserByEmail(email, users) {
   for (let u in users) {
-    if (users[u].email == email) {
+    if (users[u].email === email) {
       return users[u];
     }
   }
-  return undefined;
+  return null;
 }
 
 const isLoggedIn = function(req, res) {
