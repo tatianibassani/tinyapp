@@ -33,6 +33,7 @@ app.get("/", (req, res) => {
 app.get("/urls", (req, res) => {
   if (!req.session.user_id) {
     res.status(403).send("You are not logged in. Please log in and try again.");
+    return;
   }
 
   renderUrls(req, res, users, urlDatabase);
@@ -55,10 +56,12 @@ app.get("/urls/:id", (req, res) => {
   } else {
     if (!urlDatabase[req.params.id]) {
       res.status(400).send('Page not found.');
+      return;
     }
 
     if (urlDatabase[req.params.id].userID !== user.id) {
       res.status(403).send("You don't have access to this page.");
+      return;
     }
 
     const templateVars = {
@@ -73,6 +76,7 @@ app.get("/urls/:id", (req, res) => {
 app.get("/u/:id", (req, res) => {
   if (!urlDatabase[req.params.id]) {
     res.status(400).send("Page not found.");
+    return;
   }
 
   let longURL = urlDatabase[req.params.id].longURL;
@@ -106,6 +110,7 @@ app.get("/login", (req, res) => {
 app.post("/urls", (req, res) => {
   if (!req.session.user_id) {
     res.status(401).send('You are not logged in. Please log in and try again.');
+    return;
   }
 
   let shortUrl = generateRandomString();
@@ -120,7 +125,7 @@ app.post("/urls", (req, res) => {
 
   const user = users[req.session.user_id];
   const templateVars = {
-    id: req.params.id,
+    id: shortUrl,
     longURL,
     user
   };
@@ -133,14 +138,17 @@ app.post("/urls/:id/delete", (req, res) => {
 
   if (!urlDatabase[id]) {
     res.status(400).send("This URL does not exist.");
+    return;
   }
 
   if (!user) {
     res.status(401).send('You are not logged in. Please log in and try again.');
+    return;
   }
 
   if (urlDatabase[id].userID !== user.id) {
     res.status(403).send("You cannot delete this URL.");
+    return;
   }
   
   delete urlDatabase[id];
@@ -153,14 +161,17 @@ app.post("/urls/:id/edit", (req, res) => {
 
   if (!urlDatabase[id]) {
     res.status(400).send("This URL does not exist.");
+    return;
   }
 
   if (!user) {
     res.status(401).send('You are not logged in. Please log in and try again.');
+    return;
   }
 
   if (urlDatabase[id].userID !== user.id) {
     res.status(403).send("You cannot edit this URL.");
+    return;
   }
   
   urlDatabase[id].longURL = req.body.newValue;
@@ -175,18 +186,17 @@ app.post("/login", (req, res) => {
 
   const user = getUserByEmail(email, users);
 
-  console.log(user);
-
-  if (user === null) {
-    res.status(403).send('Wrong credentials!');
-  }
-
-  //Use the bcrypt library to check if the password is correct
-  if (bcrypt.compareSync(password, user.password)) {
-    req.session.user_id = user.id;
-    res.redirect("/urls");
+  if (!user) {
+    res.status(403).send('User not found.');
+    return;
   } else {
-    res.status(403).send('Wrong credentials!');
+    //Use the bcrypt library to check if the password is correct
+    if (bcrypt.compareSync(password, user.password)) {
+      req.session.user_id = user.id;
+      res.redirect("/urls");
+    } else {
+      res.status(403).send('Wrong credentials!');
+    }
   }
 });
 
@@ -201,12 +211,13 @@ app.post("/register", (req, res) => {
   const password = req.body.password;
 
   let user = getUserByEmail(email, users);
-  let userExists = user !== null;
 
   if (!email || !password) {
-    res.status(400).send('Email and password cannot be empty.')
-  } else if (userExists) {
-    res.status(403).send('User already exists.')
+    res.status(400).send('Email and password cannot be empty.');
+    return;
+  } else if (user) {
+    res.status(403).send('User already exists.');
+    return;
   } else {
     //Encrypt the password using the bcrypt library
     const hashedPassword = bcrypt.hashSync(password, 10);

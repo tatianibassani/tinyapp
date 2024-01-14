@@ -13,12 +13,12 @@ function generateRandomString() {
 
 //Search for a user by email
 function getUserByEmail(email, users) {
-  for (let user in users) {
-    if (users[user].email === email) {
-      return users[user];
+  for (let userId in users) {
+    if (users[userId].email === email) {
+      return users[userId];
     }
   }
-  return null;
+  return undefined;
 }
 
 //Check if the user is logged in, if not, redirect to login page
