@@ -25,6 +25,7 @@ function getUserByEmail(email, users) {
 const isLoggedIn = function(req, res) {
   if (!req.session.user_id) {
     res.redirect('/login');
+    return;
   }
 };
 

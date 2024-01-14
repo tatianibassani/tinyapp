@@ -26,8 +26,11 @@ app.get("/urls.json", (req, res) => {
 });
 
 app.get("/", (req, res) => {
-  isLoggedIn(req, res);
-  res.redirect("/urls");
+  if (!req.session.user_id) {
+    res.redirect('/login');
+  } else {
+    res.redirect("/urls");
+  }
 });
 
 app.get("/urls", (req, res) => {
@@ -123,13 +126,7 @@ app.post("/urls", (req, res) => {
 
   Object.assign(urlDatabase, {[shortUrl]: newUrl});
 
-  const user = users[req.session.user_id];
-  const templateVars = {
-    id: shortUrl,
-    longURL,
-    user
-  };
-  res.render("urls_show", templateVars);
+  res.redirect("urls/"+shortUrl);
 });
 
 app.post("/urls/:id/delete", (req, res) => {
@@ -176,7 +173,7 @@ app.post("/urls/:id/edit", (req, res) => {
   
   urlDatabase[id].longURL = req.body.newValue;
 
-  renderUrls(req, res, users, urlDatabase);
+  res.redirect('/urls');
 });
 
 
