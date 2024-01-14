@@ -1,4 +1,5 @@
 const express = require("express");
+const bcrypt = require("bcryptjs");
 const cookieParser = require("cookie-parser");
 const { users } = require("./database");
 const app = express();
@@ -179,7 +180,7 @@ app.post("/login", (req, res) => {
     res.status(403).send('Wrong credentials!');
   }
 
-  if (password === user.password) {
+  if (bcrypt.compareSync(password, user.password)) {
     res.cookie('user_id', user.id);
     res.redirect("/urls");
   } else {
@@ -205,8 +206,9 @@ app.post("/register", (req, res) => {
   } else if (userExists) {
     res.status(403).send('User already exists.')
   } else {
+    const hashedPassword = bcrypt.hashSync(password, 10);
     Object.assign(users, {[id]: 
-      Object.assign({}, {id, email, password})
+      Object.assign({}, {id, email, password: hashedPassword})
     });
 
     res.cookie('user_id', id);
